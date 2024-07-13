@@ -1,0 +1,47 @@
+name: Upload on AWS S3
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "client/**"
+
+defaults:
+  run:
+    working-directory: "client"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Create build
+        run: npm run build
+
+      - name: Save AWS Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.ACCESS_KEY }}" >> "$GITHUB_ENV"
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }}" >> "$GITHUB_ENV"
+          echo "AWS_REGION=us-east-1" >>  "$GITHUB_ENV"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload to S3
+        run: aws s3 sync ./build s3://cyf-cafe-menu --delete

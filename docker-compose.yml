@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  database:
+    container_name: database
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+    volumes:
+      - cyfcafemenu:/var/lib/postgresql/data
+      - ./server/menu.sql:/docker-entrypoint-initdb.d/menu.sql
+
+  backend:
+    container_name: backend
+    build: ./server
+    ports:
+      - 3008:3008
+    environment:
+      DB_URL: postgres://postgres:password@localhost:5432
+
+  frontend:
+    container_name: frontend
+    build: ./client
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
+    ports:
+      - 3000:3000
+
+volumes:
+  cyfcafemenu:
