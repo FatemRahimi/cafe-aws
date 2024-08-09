@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AdminMenu from "./pages/AdminMenu";
-
+import Home from "./pages/Home";
 import Form from "./pages/Form";
 import AppContext from "./components/Context";
 import { useEffect, useState } from "react";
